@@ -1,14 +1,22 @@
 {
-  "name": "native-webcomponents-playground",
-  "version": "1.0.0",
-  "description": "",
-  "main": "featured-dropdown.mjs",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@webcomponents/webcomponentsjs": "^2.2.0"
-  }
+    "name": "native-webcomponents-playground",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "webpack"
+    },
+    "author": "Marcin Kołodziejczak",
+    "license": "MIT",
+    "dependencies": {
+        "@webcomponents/webcomponentsjs": "^2.2.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.1.6",
+        "@babel/preset-env": "^7.1.6",
+        "babel-loader": "^8.0.4",
+        "webpack": "^4.26.0",
+        "webpack-cli": "^3.1.2"
+    }
 }
