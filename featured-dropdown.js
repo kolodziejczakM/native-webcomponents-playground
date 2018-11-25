@@ -16,6 +16,7 @@ staticTemplate.innerHTML = `
 
             font-family: 'sans-serif, Helvetica';
             font-size: 14px;
+            cursor: pointer;
             color: var(--black);
         }
 
@@ -124,11 +125,9 @@ class FeaturedDropdown extends HTMLElement {
         this.renderSelectedOption();
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'chosen-option') {
-            this.renderOptions();
-            this.renderSelectedOption();
-        }
+    attributeChangedCallback() {
+        this.renderOptions();
+        this.renderSelectedOption();
     }
 
     disconnectedCallback() {
@@ -141,7 +140,6 @@ class FeaturedDropdown extends HTMLElement {
 
     setOptions(value) {
         this.setAttribute('options', JSON.stringify(value));
-        this.options = value;
     }
 
     getChosenOption() {
@@ -149,18 +147,13 @@ class FeaturedDropdown extends HTMLElement {
     }
 
     setChosenOption(value) {
-        let newValue = value;
+        const valueStringified = typeof value === 'string' ? value : JSON.stringify(value);
 
-        if (typeof value !== 'string') {
-            newValue = JSON.stringify(value);
-        }
-
-        this.setAttribute('chosen-option', newValue);
-        this.chosenOption = value;
+        this.setAttribute('chosen-option', valueStringified);
     }
 
     onExpandClick() {
-        if (this.options.length) {
+        if (this.getOptions().length) {
             this.isExpanded = true;
             this.rootNode.querySelector('.options').classList.add('options--expanded');
         }
@@ -182,8 +175,11 @@ class FeaturedDropdown extends HTMLElement {
         this.setChosenOption(selectedOption);
         this.collapse();
 
-        // method with callback - bad, you have to know scope
+        // 'reactish' method with callback - not preferred here; you have to know scope (window in that case)
         window[this.getAttribute('on-change-handler')](selectedOption);
+
+        // event appraoch; preferred
+        this.dispatchEvent(new CustomEvent('dropdownValueChanged', { detail: selectedOption }));
     }
 
     renderSelectedOption() {
@@ -192,7 +188,7 @@ class FeaturedDropdown extends HTMLElement {
     }
 
     renderOptions() {
-        const optionsHTML = this.options
+        const optionsHTML = this.getOptions()
             .map(
                 option => `
             <option

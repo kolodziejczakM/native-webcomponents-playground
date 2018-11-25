@@ -1,0 +1,26 @@
+:root {
+    --gray: #3a3a3a;
+}
+
+.header {
+    font-family: 'Amatic SC', cursive;
+    display: flex;
+    align-items: center;
+}
+
+.banner {
+    margin-right: 20px;
+}
+
+.row {
+    margin: 10px;
+}
+
+.custom-dropdown-wrapper {
+    width: 200px;
+}
+
+.separator {
+    border-bottom: 1px solid var(--gray);
+    margin-bottom: 10px;
+}
