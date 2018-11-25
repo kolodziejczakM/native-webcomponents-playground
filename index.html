@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WebComponents Native API test 2019</title>
+
+        <!--
+            <script defer src="node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+            about 100KB, not needed for new browsers
+        -->
+    </head>
+    <body>
+        <select>
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="audi">Audi</option>
+        </select>
+
+        <featured-dropdown
+            on-change-handler="dropdownCallback"
+            chosen-option='{ "label": "Poland", "value": "PL" }'
+            options='[
+                { "label": "Poland", "value": "PL" },
+                { "label": "Germany", "value": "DE" },
+                { "label": "Sweden", "value": "SE" },
+                { "label": "Norway", "value": "NO" }
+            ]'
+        >
+            <img src="./angle-arrow-down.svg" slot="dropdown-arrow" />
+        </featured-dropdown>
+
+        <template id="sample-template-tag">
+            IT IS INVISIBLE, BUT THIS NODE EXIST AND CAN BE REUSED.
+        </template>
+
+        <div id="my-app-root"></div>
+
+        <!-- SCRIPTS -->
+        <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+        <script src="node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
+        <!--
+            needed when targeting to ES5 cause according to the spec, only ES6 classes
+            may be passed to the native customElements.define API (see: featured-dropdown.mjs)
+        -->
+
+        <script type="module" src="featured-dropdown.js"></script>
+        <!-- could be also .mjs extension -->
+        <script>
+            const template = document.querySelector('#sample-template-tag');
+            const alertSomething = () => {
+                alert('This is how template works');
+            };
+
+            template.innerHTML = `<button onclick="alertSomething()">Open alert!</button>`;
+
+            const reusedTemplateInstance = document.importNode(template.content, true); // deep cloning template
+
+            document.querySelector('#my-app-root').appendChild(reusedTemplateInstance); // putting here template directly won't work
+
+            var dropdownCallback = () => {
+                console.log('Callback called!');
+            };
+        </script>
+    </body>
+</html>
