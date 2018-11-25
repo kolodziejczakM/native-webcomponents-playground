@@ -1,4 +1,5 @@
 const staticTemplate = document.createElement('template');
+window.ShadyCSS && ShadyCSS.prepareTemplate(staticTemplate, 'featured-dropdown');
 
 staticTemplate.innerHTML = `
     <style>
@@ -94,9 +95,11 @@ class FeaturedDropdown extends HTMLElement {
     constructor() {
         super();
 
+        // shadowDOM support for older browsers
         // open means that ou can access the shadow DOM using JavaScript written in the main page context,
         // for example using the Element.shadowRoot property
         // node.cloneNode is another way for deep cloning
+        window.ShadyCSS && ShadyCSS.styleElement(this);
         this.rootNode = this.attachShadow({ mode: 'open' });
         this.rootNode.appendChild(staticTemplate.content.cloneNode(true));
 
@@ -165,7 +168,7 @@ class FeaturedDropdown extends HTMLElement {
     }
 
     onOutsideClick(event) {
-        if (event.target !== this) {
+        if (event.target !== this && !event.target.slot) {
             this.collapse();
         }
     }
