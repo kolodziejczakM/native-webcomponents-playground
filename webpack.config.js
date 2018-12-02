@@ -3,13 +3,13 @@ module.exports = {
         main: [
             '@webcomponents/webcomponentsjs/webcomponents-loader',
             '@webcomponents/webcomponentsjs/custom-elements-es5-adapter',
-            './src/index.js',
+            './src/index.mjs',
         ]
     },
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.mjs$/,
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader'
