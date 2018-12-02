@@ -75,7 +75,7 @@ staticTemplate.innerHTML = `
 
 // Custom elements have four special instance methods which will run at different times:
 
-// 1. connectedCallback ~~ componentDidMount / componentDidUpdate,
+// 1. connectedCallback == componentDidMount,
 
 // 2. attributeChangedCallback == componentWillReceiveProps / getDerivedStateFromProps,
 
@@ -103,9 +103,9 @@ class FeaturedDropdown extends HTMLElement {
         this.rootNode = this.attachShadow({ mode: 'open' });
         this.rootNode.appendChild(staticTemplate.content.cloneNode(true));
 
-        // Set default values of properties.
-        this.options = [];
-        this.chosenOption = { label: '(no options)', value: null };
+        // Set default values of properties && attributes.
+        this.options = this.options || [];
+        this.chosenOption = this.chosenOption || { label: '(no options)', value: null };
         this.isExpanded = false;
 
         // binding assigned methods (like in React)
@@ -116,11 +116,9 @@ class FeaturedDropdown extends HTMLElement {
 
     connectedCallback() {
         // initialize properties that depend on light DOM
-        this.setOptions(this.getOptions());
-        this.setChosenOption(this.getChosenOption());
 
         // attaching needed event listeners
-        this.rootNode.querySelector('.selected-option').onclick = this.onExpandClick;
+        this.rootNode.querySelector('.selected-option').addEventListener('click', this.onExpandClick);
         document.addEventListener('click', this.onOutsideClick);
 
         // render dynamic content (list && selected option)
@@ -134,29 +132,31 @@ class FeaturedDropdown extends HTMLElement {
     }
 
     disconnectedCallback() {
+        // unsubscribing listeners
         document.removeEventListener('click', this.onOutsideClick);
+        this.rootNode.querySelector('.selected-option').removeEventListener('click', this.onExpandClick);
     }
 
-    getOptions() {
-        return JSON.parse(this.getAttribute('options')) || this.options;
+    get options() {
+        return JSON.parse(this.getAttribute('options'));
     }
 
-    setOptions(value) {
+    set options(value) {
         this.setAttribute('options', JSON.stringify(value));
     }
 
-    getChosenOption() {
-        return JSON.parse(this.getAttribute('chosen-option')) || this.chosenOption;
+    get chosenOption() {
+        return JSON.parse(this.getAttribute('chosen-option'));
     }
 
-    setChosenOption(value) {
+    set chosenOption(value) {
         const valueStringified = typeof value === 'string' ? value : JSON.stringify(value);
 
         this.setAttribute('chosen-option', valueStringified);
     }
 
     onExpandClick() {
-        if (this.getOptions().length) {
+        if (this.options.length) {
             this.isExpanded = true;
             this.rootNode.querySelector('.options').classList.add('options--expanded');
         }
@@ -175,7 +175,7 @@ class FeaturedDropdown extends HTMLElement {
 
     onChangeHandler(event) {
         const selectedOption = event.target.getAttribute('value');
-        this.setChosenOption(selectedOption);
+        this.chosenOption = selectedOption;
         this.collapse();
 
         // 'reactish' method with callback - not preferred here; you have to know scope (window in that case)
@@ -187,11 +187,11 @@ class FeaturedDropdown extends HTMLElement {
 
     renderSelectedOption() {
         this.rootNode.querySelector('.selected-option__label').innerHTML =
-        this.getChosenOption().label;
+        this.chosenOption.label;
     }
 
     renderOptions() {
-        const optionsHTML = this.getOptions()
+        const optionsHTML = this.options
             .map(
                 option => `
             <option
