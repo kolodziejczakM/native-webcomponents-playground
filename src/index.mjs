@@ -87,11 +87,6 @@ staticTemplate.innerHTML = `
 // All defined as null by default.
 
 class FeaturedDropdown extends HTMLElement {
-    // Attributes that you want to observe - any change in them will fire attributeChangedCallback
-    static get observedAttributes() {
-        return ['chosen-option'];
-    }
-
     constructor() {
         super();
 
@@ -106,7 +101,7 @@ class FeaturedDropdown extends HTMLElement {
         // Set default values of properties && attributes.
         this.options = this.options || [];
         this.chosenOption = this.chosenOption || { label: '(no options)', value: null };
-        this.isExpanded = false;
+        this.isExpanded = this.isExpanded || false;
 
         // binding assigned methods (like in React)
         this.onExpandClick = this.onExpandClick.bind(this);
@@ -126,33 +121,20 @@ class FeaturedDropdown extends HTMLElement {
         this.renderSelectedOption();
     }
 
-    attributeChangedCallback() {
-        this.renderOptions();
-        this.renderSelectedOption();
-    }
-
     disconnectedCallback() {
         // unsubscribing listeners
         document.removeEventListener('click', this.onOutsideClick);
         this.rootNode.querySelector('.selected-option').removeEventListener('click', this.onExpandClick);
     }
 
-    get options() {
-        return JSON.parse(this.getAttribute('options'));
+    get isExpanded() {
+        return this.hasAttribute('is-expanded');
     }
 
-    set options(value) {
-        this.setAttribute('options', JSON.stringify(value));
-    }
+    set isExpanded(value) {
+        const val = Boolean(value);
 
-    get chosenOption() {
-        return JSON.parse(this.getAttribute('chosen-option'));
-    }
-
-    set chosenOption(value) {
-        const valueStringified = typeof value === 'string' ? value : JSON.stringify(value);
-
-        this.setAttribute('chosen-option', valueStringified);
+        this.setAttribute('is-expanded', val);
     }
 
     onExpandClick() {
@@ -174,14 +156,18 @@ class FeaturedDropdown extends HTMLElement {
     }
 
     onChangeHandler(event) {
-        const selectedOption = event.target.getAttribute('value');
+        const selectedOption = JSON.parse(event.target.getAttribute('value'));
         this.chosenOption = selectedOption;
         this.collapse();
 
+        this.renderOptions();
+        this.renderSelectedOption();
+
         // 'reactish' method with callback - not preferred here; you have to know scope (window in that case)
-        window[this.getAttribute('on-change-handler')](selectedOption);
+        // window[this.getAttribute('on-change-handler')](selectedOption);
 
         // event appraoch; preferred
+        this.onChangeHandlerCallback(selectedOption);
         this.dispatchEvent(new CustomEvent('dropdownValueChanged', { detail: selectedOption }));
     }
 

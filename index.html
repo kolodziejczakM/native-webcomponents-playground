@@ -29,14 +29,6 @@
         <section class="row custom-dropdown-wrapper">
             <featured-dropdown
                 id="ft-dropdown"
-                on-change-handler="dropdownCallback"
-                chosen-option='{ "label": "Poland", "value": "PL" }'
-                options='[
-                    { "label": "Poland", "value": "PL" },
-                    { "label": "Germany", "value": "DE" },
-                    { "label": "Sweden", "value": "SE" },
-                    { "label": "Norway", "value": "NO" }
-                ]'
             >
                 <img src="./angle-arrow-down.svg" slot="dropdown-arrow" />
             </featured-dropdown>
@@ -77,9 +69,21 @@
                 console.log('Callback called, selected: ', option);
             };
 
-            document.getElementById('ft-dropdown').addEventListener('dropdownValueChanged', e => {
+            const component = document.getElementById('ft-dropdown');
+
+            component.addEventListener('dropdownValueChanged', e => {
                 console.log('instead of using callbacks!, selected: ', e.detail);
             });
+            
+            component.chosenOption = { "label": "Poland", "value": "PL" };
+            component.options = [
+                { "label": "Poland", "value": "PL" },
+                { "label": "Germany", "value": "DE" },
+                { "label": "Sweden", "value": "SE" },
+                { "label": "Norway", "value": "NO" }
+            ];
+            component.onChangeHandlerCallback = dropdownCallback;
+
         </script>
     </body>
 </html>

@@ -1,8 +1,6 @@
 module.exports = {
     entry: {
         main: [
-            '@webcomponents/webcomponentsjs/webcomponents-loader',
-            '@webcomponents/webcomponentsjs/custom-elements-es5-adapter',
             './src/index.mjs',
         ]
     },
@@ -16,5 +14,8 @@ module.exports = {
                 }
             }
         ]
+    },
+    output: {
+        libraryTarget: 'commonjs2',
     }
 };
