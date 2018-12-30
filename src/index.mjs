@@ -99,9 +99,12 @@ class FeaturedDropdown extends HTMLElement {
         this.rootNode.appendChild(staticTemplate.content.cloneNode(true));
 
         // Set default values of properties && attributes.
-        this.options = this.options || [];
-        this.chosenOption = this.chosenOption || { label: '(no options)', value: null };
-        this.isExpanded = this.isExpanded || false;
+        // commented due to errors:
+        // in chrome: Uncaught DOMException: Failed to construct 'CustomElement': The result must not have attributes
+        // in FF: NotSupportedError: Operation is not supported
+        // this.options = this.options || [];
+        // this.chosenOption = this.chosenOption || { label: '(no options)', value: null };
+        // this.isExpanded = this.isExpanded || false;
 
         // binding assigned methods (like in React)
         this.onExpandClick = this.onExpandClick.bind(this);
