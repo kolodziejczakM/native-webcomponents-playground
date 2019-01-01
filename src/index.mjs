@@ -1,5 +1,4 @@
 const staticTemplate = document.createElement('template');
-// window.ShadyCSS && ShadyCSS.prepareTemplate(staticTemplate, 'featured-dropdown');
 
 staticTemplate.innerHTML = `
     <style>
@@ -16,6 +15,7 @@ staticTemplate.innerHTML = `
             --icon-dimension: 25px;
 
             font-family: 'sans-serif, Helvetica';
+            text-align: left;
             font-size: 14px;
             cursor: pointer;
             color: var(--black);
@@ -61,7 +61,6 @@ staticTemplate.innerHTML = `
             height: var(--icon-dimension);
         }
     </style>
-
     <div class="dropdown">
         <div class="selected-option">
             <span class="selected-option__label"><!-- dynamic render--></span>
@@ -73,87 +72,56 @@ staticTemplate.innerHTML = `
     </div>
 `;
 
-// Custom elements have four special instance methods which will run at different times:
-
-// 1. connectedCallback == componentDidMount,
-
-// 2. attributeChangedCallback == componentWillReceiveProps / getDerivedStateFromProps,
-
-// 3. disconnectedCallback == componentWillUnmount,
-
-// 4. adoptedCallback - when adoptNode is called, after disconnectedCallback and before connectedCallback
-// will run when it disconnects from its original document, then the adoptedCallback, and finally the connectedCallback when it connects to your document.
-
-// All defined as null by default.
-
 class FeaturedDropdown extends HTMLElement {
     constructor() {
         super();
 
-        // shadowDOM support for older browsers
-        // open means that ou can access the shadow DOM using JavaScript written in the main page context,
-        // for example using the Element.shadowRoot property
-        // node.cloneNode is another way for deep cloning
-
-        // commented due to errors
-        // window.ShadyCSS && ShadyCSS.styleElement(this);
         this.rootNode = this.attachShadow({ mode: 'open' });
         this.rootNode.appendChild(staticTemplate.content.cloneNode(true));
 
-        // Set default values of properties && attributes.
-        // commented due to errors:
-        // in chrome: Uncaught DOMException: Failed to construct 'CustomElement': The result must not have attributes
-        // in FF: NotSupportedError: Operation is not supported
-        // this.options = this.options || [];
-        // this.chosenOption = this.chosenOption || { label: '(no options)', value: null };
-        // this.isExpanded = this.isExpanded || false;
+        this.selectedOptionNode = this.rootNode.querySelector('.selected-option');
+        this.optionsNode = this.rootNode.querySelector('.options');
+        this.expandedClassName = 'options--expanded';
 
-        // binding assigned methods (like in React)
+        this._options = this._options || [];
+        this._chosenOption = this._chosenOption || { label: '(no options)', value: null };
 
-        // commented due to errors:
-        // this.onExpandClick = this.onExpandClick.bind(this);
-        // this.onOutsideClick = this.onOutsideClick.bind(this);
-        // this.onChangeHandler = this.onChangeHandler.bind(this);
+        this.onExpandClick = this.onExpandClick.bind(this);
+        this.onOutsideClick = this.onOutsideClick.bind(this);
+        this.onChangeHandler = this.onChangeHandler.bind(this);
+    }
+
+    set options(options) {
+        this._options = options;
+        this.renderOptions();
+    }
+
+    set chosenOption(option) {
+        this._chosenOption = option;
+        this.renderSelectedOption();
     }
 
     connectedCallback() {
-        // initialize properties that depend on light DOM
-
-        // attaching needed event listeners
-        this.rootNode.querySelector('.selected-option').addEventListener('click', this.onExpandClick);
+        this.selectedOptionNode.addEventListener('click', this.onExpandClick);
         document.addEventListener('click', this.onOutsideClick);
 
-        // render dynamic content (list && selected option)
         this.renderOptions();
         this.renderSelectedOption();
     }
 
     disconnectedCallback() {
-        // unsubscribing listeners
         document.removeEventListener('click', this.onOutsideClick);
-        this.rootNode.querySelector('.selected-option').removeEventListener('click', this.onExpandClick);
-    }
-
-    get isExpanded() {
-        return this.hasAttribute('is-expanded');
-    }
-
-    set isExpanded(value) {
-        const val = Boolean(value);
-
-        this.setAttribute('is-expanded', val);
+        this.selectedOptionNode.removeEventListener('click', this.onExpandClick);
     }
 
     onExpandClick() {
-        if (this.options.length) {
-            this.isExpanded = true;
-            this.rootNode.querySelector('.options').classList.add('options--expanded');
+        if (this._options && this._options.length) {
+            this.optionsNode.classList.add(this.expandedClassName);
         }
     }
 
     collapse() {
-        this.isExpanded = false;
-        this.rootNode.querySelector('.options').classList.remove('options--expanded');
+        this.optionsNode.classList.remove(this.expandedClassName);
     }
 
     onOutsideClick(event) {
@@ -164,27 +132,24 @@ class FeaturedDropdown extends HTMLElement {
 
     onChangeHandler(event) {
         const selectedOption = JSON.parse(event.target.getAttribute('value'));
-        this.chosenOption = selectedOption;
-        this.collapse();
+        this._chosenOption = selectedOption;
 
+        this.collapse();
         this.renderOptions();
         this.renderSelectedOption();
-
-        // 'reactish' method with callback - not preferred here; you have to know scope (window in that case)
-        // window[this.getAttribute('on-change-handler')](selectedOption);
-
-        // event appraoch; preferred
-        this.onChangeHandlerCallback(selectedOption);
-        this.dispatchEvent(new CustomEvent('dropdownValueChanged', { detail: selectedOption }));
+        this.dispatchEvent(
+            new CustomEvent('featuredDropdownValueChanged', { detail: selectedOption })
+        );
     }
 
     renderSelectedOption() {
-        this.rootNode.querySelector('.selected-option__label').innerHTML =
-        this.chosenOption.label;
+        this.rootNode.querySelector(
+            '.selected-option__label'
+        ).innerHTML = this._chosenOption.label;
     }
 
     renderOptions() {
-        const optionsHTML = this.options
+        const optionsHTML = this._options
             .map(
                 option => `
             <option
@@ -196,12 +161,11 @@ class FeaturedDropdown extends HTMLElement {
             )
             .join(' ');
 
-        this.rootNode.querySelector('.options').innerHTML = optionsHTML;
+        this.optionsNode.innerHTML = optionsHTML;
         this.rootNode.querySelectorAll('option').forEach(option => {
             option.onclick = this.onChangeHandler;
         });
     }
 }
 
-// register new tag and associate it with the class
 customElements.define('featured-dropdown', FeaturedDropdown);
