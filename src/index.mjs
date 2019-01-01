@@ -109,9 +109,11 @@ class FeaturedDropdown extends HTMLElement {
         // this.isExpanded = this.isExpanded || false;
 
         // binding assigned methods (like in React)
-        this.onExpandClick = this.onExpandClick.bind(this);
-        this.onOutsideClick = this.onOutsideClick.bind(this);
-        this.onChangeHandler = this.onChangeHandler.bind(this);
+
+        // commented due to errors:
+        // this.onExpandClick = this.onExpandClick.bind(this);
+        // this.onOutsideClick = this.onOutsideClick.bind(this);
+        // this.onChangeHandler = this.onChangeHandler.bind(this);
     }
 
     connectedCallback() {
